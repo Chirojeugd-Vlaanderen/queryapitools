@@ -1,7 +1,7 @@
 <?php
 /*
   be.chiro.civi.queryapitools - tools for creating API's based on query results.
-  Copyright (C) 2016  Chirojeugd-Vlaanderen vzw
+  Copyright (C) 2016, 2017  Chirojeugd-Vlaanderen vzw
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
@@ -25,63 +25,35 @@
  *
  * @author johanv
  */
-class CRM_Queryapitools_SelectQuery extends \Civi\API\SelectQuery {
+class CRM_Queryapitools_SelectQuery extends \Civi\API\Api3SelectQuery {
   /**
    * Constructs a select query.
-   * 
+   *
    * @param string $query Query that provides all data.
    * @param array $params parameters for the API call.
-   * @param string $baoName The API will be called as if this is a get-
-   *                        operation on this kind of BAO. This is relevant
-   *                        for ACL's, permissions and custom fields,
-   *                        I guess.
-   * @param array $extraFields Field specs for columns your query will return, 
+   * @param string $entity The API will be called as if this is a get-
+   *                       operation on this kind of entity. This is relevant
+   *                       for ACL's, permissions and custom fields,
+   *                       I guess.
+   * @param array $extraFields Field specs for columns your query will return,
    *                           in addition to the standard fields provided by the
    *                           BAO.
    */
-  public function __construct($query, $params, $baoName, $extraFields) {
+  public function __construct($query, $params, $entity, $extraFields) {
     // Let's pretend to create an ordinary query.
-    parent::__construct($baoName, $params, FALSE);
-    
+    parent::__construct($entity, $params, FALSE);
+
     // Append field names to field names and spec of $bao.
     foreach ($extraFields as $key => $value) {
       $this->entityFieldNames[] = $key;
       $this->apiFieldSpec[$key] = $value;
     }
-   
-    // Mess with the query.
+
+    // Replace the query.
     $this->query = \CRM_Utils_SQL_Select::from('(' . $query . ')' . ' ' . self::MAIN_TABLE_ALIAS);
 
-    // Add ACLs first to avoid redundant subclauses
+    // Redo ACL magic from parent class for new query.
+    $baoName = _civicrm_api3_get_BAO($entity);
     $this->query->where($this->getAclClause(self::MAIN_TABLE_ALIAS, $baoName));
   }
-  
-  /**
-   * Get acl clause for an entity.
-   * 
-   * I had to copy this from the base class, because it is a private function.
-   * :-P
-   *
-   * @param string $tableAlias
-   * @param string $baoName
-   * @param array $stack
-   * @return array
-   */
-  private function getAclClause($tableAlias, $baoName, $stack = array()) {
-    if (!$this->checkPermissions) {
-      return array();
-    }
-    // Prevent (most) redundant acl sub clauses if they have already been applied to the main entity.
-    // FIXME: Currently this only works 1 level deep, but tracking through multiple joins would increase complexity
-    // and just doing it for the first join takes care of most acl clause deduping.
-    if (count($stack) === 1 && in_array($stack[0], $this->aclFields)) {
-      return array();
-    }
-    $clauses = $baoName::getSelectWhereClause($tableAlias);
-    if (!$stack) {
-      // Track field clauses added to the main entity
-      $this->aclFields = array_keys($clauses);
-    }
-    return array_filter($clauses);
-  }  
 }

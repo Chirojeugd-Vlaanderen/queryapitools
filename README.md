@@ -6,10 +6,17 @@ expressed using API parameters, you can use this extension to create a custom
 API that returns the data from the query, in a way that you can use API
 filters, options and joining as always.
 
-The implementation is rather hacky, but it works for CiviCRM 4.7.
+The implementation is rather hacky, but it works for CiviCRM 4.7.15.
 
 Note that this is an alpha version. Things may change siginificantly in the
 future. Or the extenstion might just die as well ;-)
+
+## Compatibility warning!
+
+In CiviCRM 4.7.13 or CiviCRM 4.7.14, something changed in the CiviCRM API,
+which broke version 0.1-alpha1 of the queryapitools extensions.
+Version 1.0-alpha1 of this extension should work with CiviCRM 4.7.15 and
+(hopefully) later.
 
 ## example
 
@@ -77,8 +84,8 @@ goodness. This is how your api function might look:
         $query, 
         // the params the client passed to the API
         $params, 
-        // the BAO to get the existing fields from
-        'CRM_Contact_BAO_Contact', 
+        // the entity to get the existing fields from
+        'Contact', 
         // the fields we are adding
         $extraFields);
       return $result;

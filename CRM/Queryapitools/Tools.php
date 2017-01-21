@@ -1,7 +1,7 @@
 <?php
 /*
   be.chiro.civi.queryapitools - tools for creating API's based on query results.
-  Copyright (C) 2016  Chirojeugd-Vlaanderen vzw
+  Copyright (C) 2016, 2017  Chirojeugd-Vlaanderen vzw
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
@@ -28,8 +28,8 @@ class CRM_Queryapitools_Tools {
    * 
    * @param string $query Query that provides all data.
    * @param array $params parameters for the API call.
-   * @param string $baoName The API will be called as if this is a get-
-   *                           operation on this kind of BAO. This is relevant
+   * @param string $entity The API will be called as if this is a get-
+   *                           operation on this kind of entity. This is relevant
    *                           for ACL's, permissions and custom fields,
    *                           I guess.
    * @param array $extraFields Field specs for columns your query will return, 
@@ -39,9 +39,23 @@ class CRM_Queryapitools_Tools {
    * 
    * TODO: In the long run, we should try to determine $fieldNames dynamically.
    */
-  public static function BasicGet($query, $params, $baoName, $extraFields) {
-    $selectQuery = new CRM_Queryapitools_SelectQuery($query, $params, $baoName, $extraFields);
-    $result = $selectQuery->run();
+  public static function BasicGet($query, $params, $entity, $extraFields) {
+    // I copied this more or less from _civicrm_api3_basic_get in api/v3/utils.php.
+    $options = _civicrm_api3_get_options_from_params($params);
+    $query = new CRM_Queryapitools_SelectQuery($query, $params, $entity, $extraFields);
+    $query->where = $params;
+
+    if ($options['is_count']) {
+      $query->select = array('count_rows');
+    }
+    else {
+      $query->select = array_keys(array_filter($options['return']));
+      $query->orderBy = $options['sort'];
+    }
+    $query->limit = $options['limit'];
+    $query->offset = $options['offset'];
+
+    $result = $query->run();
     return civicrm_api3_create_success($result, $params, NULL, 'get');
   }
 }
