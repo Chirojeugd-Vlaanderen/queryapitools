@@ -6,7 +6,7 @@ expressed using API parameters, you can use this extension to create a custom
 API that returns the data from the query, in a way that you can use API
 filters, options and joining as always.
 
-The implementation is rather hacky, but it works for CiviCRM 4.7.15.
+The implementation is rather hacky, but it works for CiviCRM **4.7.15**.
 
 Note that this is an alpha version. Things may change siginificantly in the
 future. Or the extenstion might just die as well ;-)
