@@ -62,19 +62,13 @@ goodness. This is how your api function might look:
         GROUP BY h.id";
 
       // The API that we are creating will already support all fields of
-      // the Contact entity. This is useful in this particular case, but
-      // there are probably situations that the fields of the new API are
-      // not a superset of the fields of an existing one. I guess I will create
-      // a new function in CRM_Queryapitools_Tools for this at some point 
-      // in the future.
-
-      // Anyway, for now I need to only declare the additional field 
+      // the Contact entity. 
+      // So for now I need to only declare the additional field 
       // that my API adds to the existing fields of the Contact API:
       $extraFields = array(
         'n_members' => array(
           'name' => 'n_members',
-          // 1: integer, 2: string
-          'type' => 1, 
+          'type' => CRM_Utils_Type::T_INT,
           'title' => 'No. of members in household',
         )
       );

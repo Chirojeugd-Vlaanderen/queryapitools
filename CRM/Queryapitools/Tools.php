@@ -31,18 +31,19 @@ class CRM_Queryapitools_Tools {
    * @param string $entity The API will be called as if this is a get-
    *                           operation on this kind of entity. This is relevant
    *                           for ACL's, permissions and custom fields,
-   *                           I guess.
-   * @param array $extraFields Field specs for columns your query will return, 
-   *                           in addition to the standard fields provided by the
-   *                           BAO.
+   *                           I guess. If you don't care about ACL's,
+   *                           permissions, custom fields, you can provide NULL.
+   * @param array $fields Field specs for columns your query will return,
+   *                      If you supplied an $entity, you should only provide
+   *                      the fields that are not provided by the standard DAO.
    * @return array API result array.
    * 
-   * TODO: In the long run, we should try to determine $fieldNames dynamically.
+   * TODO: In the long run, we should try to determine $fields dynamically.
    */
-  public static function BasicGet($query, $params, $entity, $extraFields) {
+  public static function BasicGet($query, $params, $entity, $fields) {
     // I copied this more or less from _civicrm_api3_basic_get in api/v3/utils.php.
     $options = _civicrm_api3_get_options_from_params($params);
-    $query = new CRM_Queryapitools_SelectQuery($query, $params, $entity, $extraFields);
+    $query = new CRM_Queryapitools_SelectQuery($query, $fields, $entity);
     $query->where = $params;
 
     if ($options['is_count']) {
